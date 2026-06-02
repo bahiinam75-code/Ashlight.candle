@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ashlight Candles</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --cream:#FAF6F0;--dark:#1a1209;--gold:#C9A84C;--warm:#8B6914;
+    --accent:#E8C97A;--text:#3d2b0e;--light:#FFF9F0;
+  }
+  body{background:var(--dark);color:var(--cream);font-family:'Cormorant Garamond',serif;overflow-x:hidden;cursor:none;}
+  
+  #cursor{position:fixed;width:20px;height:20px;border:1px solid var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transition:transform 0.1s;mix-blend-mode:difference;}
+  #cursor-dot{position:fixed;width:4px;height:4px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;}
+
+  nav{position:fixed;top:0;width:100%;z-index:100;padding:1.5rem 4rem;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(26,18,9,0.9),transparent);backdrop-filter:blur(2px);}
+  .nav-logo{font-family:'Playfair Display',serif;font-size:1.4rem;letter-spacing:0.15em;color:var(--gold);}
+  .nav-links{display:flex;gap:2.5rem;list-style:none;}
+  .nav-links a{color:var(--cream);text-decoration:none;font-size:0.85rem;letter-spacing:0.2em;text-transform:uppercase;opacity:0.8;transition:opacity 0.3s,color 0.3s;}
+  .nav-links a:hover{opacity:1;color:var(--gold);}
+
+  .hero{height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+  .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 60% 40%,rgba(201,168,76,0.12) 0%,transparent 60%),radial-gradient(ellipse at 20% 80%,rgba(139,105,20,0.08) 0%,transparent 50%),var(--dark);}
+  
+  .candle-scene{position:absolute;right:10%;top:50%;transform:translateY(-50%);display:flex;gap:3rem;align-items:flex-end;}
+  .candle{display:flex;flex-direction:column;align-items:center;animation:float 4s ease-in-out infinite;}
+  .candle:nth-child(2){animation-delay:0.7s;}
+  .candle:nth-child(3){animation-delay:1.4s;}
+  
+  .flame{position:relative;margin-bottom:-2px;}
+  .flame-inner{width:10px;height:22px;background:linear-gradient(to top,#ff6b00,#ffcc00,#fff8e0);border-radius:50% 50% 20% 20%;animation:flicker 0.8s ease-in-out infinite alternate;filter:blur(1px);}
+  .flame-outer{position:absolute;top:4px;left:50%;transform:translateX(-50%);width:16px;height:30px;background:radial-gradient(ellipse,rgba(255,150,0,0.4),transparent 70%);border-radius:50%;animation:flicker 1s ease-in-out infinite alternate-reverse;}
+  .glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;background:radial-gradient(circle,rgba(255,180,0,0.3),transparent 70%);border-radius:50%;animation:pulse-glow 2s ease-in-out infinite;}
+  
+  .candle-body{border-radius:4px;position:relative;overflow:hidden;}
+  .candle-body::after{content:'';position:absolute;top:0;left:20%;width:2px;height:100%;background:rgba(255,255,255,0.15);border-radius:2px;}
+  .candle-1 .candle-body{width:50px;height:160px;background:linear-gradient(135deg,#f5e6d3,#e8c9a8,#d4a96a);}
+  .candle-2 .candle-body{width:65px;height:110px;background:linear-gradient(135deg,#2d4a3e,#1a3028,#0f2018);}
+  .candle-2 .flame-inner{background:linear-gradient(to top,#ff4500,#ff8c00,#ffd700);}
+  .candle-3 .candle-body{width:45px;height:190px;background:linear-gradient(135deg,#8b4a6b,#6b2d4d,#4d1a36);}
+  .candle-3 .flame-inner{background:linear-gradient(to top,#cc0066,#ff66aa,#ffccdd);}
+  
+  .wax-drip{position:absolute;top:0;width:4px;height:20px;border-radius:0 0 50% 50%;opacity:0.7;}
+  .candle-1 .wax-drip{background:#e8c9a8;left:30%;top:8px;}
+  
+  .wick{width:2px;height:8px;background:#2a1a00;margin-bottom:0;}
+  
+  @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+  @keyframes flicker{0%{transform:scaleX(1) scaleY(1);opacity:1;}100%{transform:scaleX(0.85) scaleY(1.1);opacity:0.9;}}
+  @keyframes pulse-glow{0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(1);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.3);}}
+
+  .hero-content{position:relative;z-index:2;max-width:600px;padding-left:10%;}
+  .hero-eyebrow{font-size:0.75rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;opacity:0;animation:fadeUp 1s 0.3s forwards;}
+  .hero-title{font-family:'Playfair Display',serif;font-size:clamp(3rem,6vw,5.5rem);line-height:1.05;margin-bottom:2rem;opacity:0;animation:fadeUp 1s 0.6s forwards;}
+  .hero-title em{color:var(--gold);font-style:italic;}
+  .hero-desc{font-size:1.1rem;font-weight:300;line-height:1.8;opacity:0.75;margin-bottom:3rem;max-width:420px;opacity:0;animation:fadeUp 1s 0.9s forwards;}
+  .hero-cta{display:inline-flex;align-items:center;gap:1rem;padding:1rem 2.5rem;border:1px solid var(--gold);color:var(--gold);text-decoration:none;font-size:0.8rem;letter-spacing:0.25em;text-transform:uppercase;transition:all 0.4s;opacity:0;animation:fadeUp 1s 1.2s forwards;cursor:pointer;background:transparent;}
+  .hero-cta:hover{background:var(--gold);color:var(--dark);}
+  .hero-cta .arrow{transition:transform 0.3s;}
+  .hero-cta:hover .arrow{transform:translateX(6px);}
+  
+  @keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+  /* hero-desc animation handled above */
+
+  .scroll-hint{position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.5rem;opacity:0.5;}
+  .scroll-line{width:1px;height:50px;background:linear-gradient(to bottom,var(--gold),transparent);animation:scroll-pulse 2s ease-in-out infinite;}
+  .scroll-text{font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;}
+  @keyframes scroll-pulse{0%,100%{opacity:0.3;transform:scaleY(0.7);}50%{opacity:1;transform:scaleY(1);}}
+
+  section{padding:8rem 4rem;}
+  .section-eyebrow{font-size:0.7rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;}
+  .section-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3.5rem);margin-bottom:3rem;line-height:1.15;}
+
+  .marquee-section{padding:2rem 0;border-top:1px solid rgba(201,168,76,0.2);border-bottom:1px solid rgba(201,168,76,0.2);overflow:hidden;background:rgba(201,168,76,0.03);}
+  .marquee-track{display:flex;gap:3rem;animation:marquee 20s linear infinite;white-space:nowrap;}
+  .marquee-item{display:flex;align-items:center;gap:1rem;font-size:0.75rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);opacity:0.7;}
+  .marquee-dot{width:4px;height:4px;background:var(--gold);border-radius:50%;}
+  @keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+  .products-section{background:var(--dark);}
+  .products-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+  .product-card{position:relative;overflow:hidden;aspect-ratio:3/4;cursor:pointer;background:#0d0a05;}
+  .product-visual{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;transition:transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);}
+  .product-card:hover .product-visual{transform:scale(1.05);}
+  .product-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,7,3,0.95) 0%,rgba(10,7,3,0.3) 50%,transparent 100%);opacity:0;transition:opacity 0.4s;}
+  .product-card:hover .product-overlay{opacity:1;}
+  .product-info{position:absolute;bottom:0;left:0;right:0;padding:2rem;transform:translateY(20px);opacity:0;transition:all 0.4s;}
+  .product-card:hover .product-info{transform:translateY(0);opacity:1;}
+  .product-name{font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:0.3rem;}
+  .product-price{color:var(--gold);font-size:0.85rem;letter-spacing:0.15em;}
+  .product-tag{position:absolute;top:1.5rem;right:1.5rem;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;padding:0.4rem 0.8rem;border:1px solid rgba(201,168,76,0.5);color:var(--gold);background:rgba(26,18,9,0.8);}
+
+  .candle-svg{width:80%;height:80%;}
+  
+  .p1-bg{background:radial-gradient(ellipse at center,#3a2200 0%,#1a0f00 100%);}
+  .p2-bg{background:radial-gradient(ellipse at center,#0a2010 0%,#050d07 100%);}
+  .p3-bg{background:radial-gradient(ellipse at center,#2d1520 0%,#120008 100%);}
+  .p4-bg{background:radial-gradient(ellipse at center,#1a1530 0%,#080510 100%);}
+  .p5-bg{background:radial-gradient(ellipse at center,#2a1800 0%,#100900 100%);}
+  .p6-bg{background:radial-gradient(ellipse at center,#1a0a00 0%,#0d0500 100%);}
+
+  .about-section{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;background:linear-gradient(135deg,#0f0b06 0%,#1a1209 100%);}
+  .about-visual{position:relative;height:500px;display:flex;align-items:center;justify-content:center;}
+  .about-circle{width:320px;height:320px;border-radius:50%;border:1px solid rgba(201,168,76,0.2);display:flex;align-items:center;justify-content:center;position:relative;}
+  .about-circle::before{content:'';position:absolute;inset:-20px;border-radius:50%;border:1px solid rgba(201,168,76,0.08);animation:spin-slow 20s linear infinite;}
+  .about-circle::after{content:'';position:absolute;inset:-40px;border-radius:50%;border:1px solid rgba(201,168,76,0.05);animation:spin-slow 30s linear infinite reverse;}
+  .about-inner-candle{display:flex;flex-direction:column;align-items:center;}
+  @keyframes spin-slow{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+  .about-text p{font-size:1.1rem;font-weight:300;line-height:2;opacity:0.8;margin-bottom:1.5rem;}
+  .about-stats{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:3rem;padding-top:3rem;border-top:1px solid rgba(201,168,76,0.15);}
+  .stat-num{font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold);display:block;}
+  .stat-label{font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;opacity:0.5;margin-top:0.3rem;}
+
+  .scents-section{background:var(--dark);}
+  .scents-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:4rem;}
+  .scent-card{padding:2rem;border:1px solid rgba(201,168,76,0.1);position:relative;overflow:hidden;transition:border-color 0.3s,transform 0.3s;}
+  .scent-card:hover{border-color:rgba(201,168,76,0.4);transform:translateY(-4px);}
+  .scent-icon{font-size:2rem;margin-bottom:1.5rem;display:block;}
+  .scent-name{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:0.5rem;}
+  .scent-desc{font-size:0.85rem;opacity:0.6;line-height:1.7;}
+  .scent-glow{position:absolute;bottom:-30px;right:-30px;width:100px;height:100px;border-radius:50%;opacity:0;transition:opacity 0.4s;}
+  .scent-card:hover .scent-glow{opacity:0.15;}
+  .sg1{background:radial-gradient(circle,#ffd700,transparent);}
+  .sg2{background:radial-gradient(circle,#ff69b4,transparent);}
+  .sg3{background:radial-gradient(circle,#90ee90,transparent);}
+  .sg4{background:radial-gradient(circle,#dda0dd,transparent);}
+
+  .testimonials{background:linear-gradient(180deg,var(--dark) 0%,#0d0a05 100%);text-align:center;}
+  .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:4rem;}
+  .testi-card{padding:2.5rem;border:1px solid rgba(201,168,76,0.1);text-align:left;}
+  .stars{color:var(--gold);font-size:0.9rem;margin-bottom:1rem;letter-spacing:0.1em;}
+  .testi-text{font-size:1rem;line-height:1.8;opacity:0.75;margin-bottom:1.5rem;font-style:italic;}
+  .testi-name{font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);}
+
+  .cta-section{padding:10rem 4rem;text-align:center;background:radial-gradient(ellipse at center,#1a1209 0%,var(--dark) 70%);position:relative;overflow:hidden;}
+  .cta-section::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;border-radius:50%;border:1px solid rgba(201,168,76,0.07);animation:pulse-ring 4s ease-in-out infinite;}
+  .cta-section::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:400px;height:400px;border-radius:50%;border:1px solid rgba(201,168,76,0.1);animation:pulse-ring 4s ease-in-out 1s infinite;}
+  @keyframes pulse-ring{0%,100%{transform:translate(-50%,-50%) scale(0.95);opacity:0.5;}50%{transform:translate(-50%,-50%) scale(1.05);opacity:1;}}
+  .cta-section .section-title{font-size:clamp(2.5rem,5vw,5rem);}
+  .cta-buttons{display:flex;gap:1.5rem;justify-content:center;margin-top:3rem;flex-wrap:wrap;}
+  .btn-primary{padding:1.1rem 3rem;background:var(--gold);color:var(--dark);font-size:0.8rem;letter-spacing:0.25em;text-transform:uppercase;border:none;cursor:pointer;font-family:'Cormorant Garamond',serif;transition:all 0.3s;}
+  .btn-primary:hover{background:var(--accent);transform:translateY(-2px);}
+  .btn-secondary{padding:1.1rem 3rem;background:transparent;color:var(--gold);font-size:0.8rem;letter-spacing:0.25em;text-transform:uppercase;border:1px solid var(--gold);cursor:pointer;font-family:'Cormorant Garamond',serif;transition:all 0.3s;}
+  .btn-secondary:hover{background:rgba(201,168,76,0.1);}
+
+  footer{padding:4rem;border-top:1px solid rgba(201,168,76,0.1);display:grid;grid-template-columns:1fr 1fr 1fr;gap:4rem;}
+  .footer-brand .nav-logo{font-size:1.8rem;display:block;margin-bottom:1rem;}
+  .footer-brand p{font-size:0.85rem;opacity:0.5;line-height:1.8;}
+  .footer-col h4{font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;}
+  .footer-col ul{list-style:none;}
+  .footer-col ul li{margin-bottom:0.8rem;}
+  .footer-col ul li a{color:var(--cream);text-decoration:none;font-size:0.9rem;opacity:0.5;transition:opacity 0.3s;}
+  .footer-col ul li a:hover{opacity:1;}
+  .footer-bottom{grid-column:1/-1;text-align:center;font-size:0.75rem;opacity:0.3;padding-top:2rem;border-top:1px solid rgba(201,168,76,0.07);}
+
+  .location-badge{display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.2rem;border:1px solid rgba(201,168,76,0.3);font-size:0.75rem;letter-spacing:0.15em;color:var(--gold);margin-top:2rem;}
+  .loc-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;animation:blink 2s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity 0.8s,transform 0.8s;}
+  .reveal.visible{opacity:1;transform:translateY(0);}
+
+  /* ── MOBILE RESPONSIVE ───────────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+
+    /* Hide custom cursor on touch devices */
+    body { cursor: auto; }
+    #cursor, #cursor-dot { display: none; }
+
+    /* Nav: hide links, keep logo + shop button */
+    nav { padding: 1.2rem 1.5rem; }
+    .nav-links { display: none; }
+
+    /* Hero: stack content, hide candles behind */
+    .hero { align-items: flex-end; padding-bottom: 6rem; }
+    .hero-content { padding: 0 1.5rem; padding-top: 7rem; max-width: 100%; }
+    .hero-title { font-size: clamp(2.4rem, 10vw, 3.5rem); }
+    .hero-desc { font-size: 1rem; max-width: 100%; margin-bottom: 2rem; }
+    .hero-cta { padding: 0.9rem 2rem; font-size: 0.75rem; }
+    .candle-scene {
+      right: -5%;
+      top: 8%;
+      transform: none;
+      gap: 1.2rem;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    .candle-1 .candle-body { width: 32px; height: 100px; }
+    .candle-2 .candle-body { width: 40px; height: 70px; }
+    .candle-3 .candle-body { width: 28px; height: 120px; }
+    .location-badge { font-size: 0.65rem; padding: 0.5rem 0.9rem; }
+
+    /* Sections padding */
+    section { padding: 5rem 1.5rem; }
+
+    /* Products: 2 columns on mobile */
+    .products-grid { grid-template-columns: repeat(2, 1fr); }
+    #products > div { padding: 4rem 1.5rem 2rem; }
+    .product-name { font-size: 1.1rem; }
+    /* On touch: always show product info overlay */
+    .product-overlay { opacity: 1; }
+    .product-info { transform: translateY(0); opacity: 1; }
+
+    /* About: single column */
+    .about-section {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+      padding: 5rem 1.5rem;
+    }
+    .about-visual { height: 280px; }
+    .about-circle { width: 220px; height: 220px; }
+
+    /* Scents: 2 columns */
+    .scents-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .scent-card { padding: 1.5rem; }
+
+    /* Testimonials: single column */
+    .testi-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+
+    /* CTA section */
+    .cta-section { padding: 6rem 1.5rem; }
+    .cta-buttons { flex-direction: column; align-items: center; gap: 1rem; }
+    .btn-primary, .btn-secondary { width: 100%; max-width: 280px; }
+
+    /* Footer: single column */
+    footer {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+      padding: 3rem 1.5rem;
+    }
+    .footer-bottom { grid-column: 1; }
+  }
+
+  @media (max-width: 480px) {
+    /* Even smaller phones */
+    .hero-title { font-size: 2.2rem; }
+    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 1px; }
+    .scents-grid { grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .about-stats { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    nav a[style] { font-size: 0.65rem; padding: 0.4rem 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-dot"></div>
+
+<nav>
+  <div class="nav-logo">ashlight</div>
+  <ul class="nav-links">
+    <li><a href="#products">Shop</a></li>
+    <li><a href="#scents">Collections</a></li>
+    <li><a href="#about">Our Story</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="https://www.instagram.com/ashlight.candles/" target="_blank" style="color:var(--gold);font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;text-decoration:none;border:1px solid rgba(201,168,76,0.4);padding:0.5rem 1.2rem;">Shop Now</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Multan's Finest — Est. 2023</p>
+    <h1 class="hero-title">Light That <em>Tells</em><br>Your Story</h1>
+    <p class="hero-desc" style="opacity:0;animation:fadeUp 1s 0.9s forwards;">Handcrafted scented candles, uniquely customized for your every mood, memory & moment. From the heart of Bohar Gate, Multan.</p>
+    <a href="https://www.instagram.com/ashlight.candles/" target="_blank" class="hero-cta">Explore Collection <span class="arrow">→</span></a>
+    <div class="location-badge"><span class="loc-dot"></span> Bohar Gate, Multan</div>
+  </div>
+  <div class="candle-scene">
+    <div class="candle candle-1">
+      <div class="flame"><div class="glow"></div><div class="flame-outer"></div><div class="flame-inner"></div></div>
+      <div class="wick"></div>
+      <div class="candle-body"><div class="wax-drip"></div></div>
+    </div>
+    <div class="candle candle-2">
+      <div class="flame"><div class="glow"></div><div class="flame-outer"></div><div class="flame-inner"></div></div>
+      <div class="wick"></div>
+      <div class="candle-body"></div>
+    </div>
+    <div class="candle candle-3">
+      <div class="flame"><div class="glow"></div><div class="flame-outer"></div><div class="flame-inner"></div></div>
+      <div class="wick"></div>
+      <div class="candle-body"></div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span class="scroll-text">Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span class="marquee-item"><span class="marquee-dot"></span>Handcrafted with love</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Scented Candles</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Custom Orders Welcome</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>5 Star Reviews</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Multan's #1 Candle Store</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Premium Fragrances</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Gift Ready Packaging</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Handcrafted with love</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Scented Candles</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Custom Orders Welcome</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>5 Star Reviews</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Multan's #1 Candle Store</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Premium Fragrances</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Gift Ready Packaging</span>
+  </div>
+</div>
+
+<section id="products" class="products-section" style="padding:0;">
+  <div style="padding:6rem 4rem 3rem;">
+    <p class="section-eyebrow reveal">Our Collection</p>
+    <h2 class="section-title reveal" style="max-width:500px;">Candles That <em style="font-family:'Playfair Display',serif;font-style:italic;color:var(--gold);">Captivate</em></h2>
+  </div>
+  <div class="products-grid">
+    <div class="product-card p1-bg" onclick="openLink('https://www.instagram.com/ashlight.candles/')">
+      <div class="product-visual">
+        <svg class="candle-svg" viewBox="0 0 200 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="230" rx="45" ry="8" fill="rgba(201,168,76,0.15)"/>
+          <rect x="60" y="100" width="80" height="130" rx="6" fill="url(#g1)"/>
+          <rect x="60" y="100" width="80" height="130" rx="6" fill="url(#g1s)" opacity="0.5"/>
+          <defs>
+            <linearGradient id="g1" x1="60" y1="100" x2="140" y2="230" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#f5e6d3"/>
+              <stop offset="100%" stop-color="#c9956a"/>
+            </linearGradient>
+            <linearGradient id="g1s" x1="60" y1="0" x2="140" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.2)"/>
+              <stop offset="40%" stop-color="rgba(255,255,255,0.0)"/>
+            </linearGradient>
+          </defs>
+          <line x1="100" y1="94" x2="100" y2="100" stroke="#3d2b0e" stroke-width="2"/>
+          <ellipse cx="100" cy="68" rx="5" ry="10" fill="#ffaa00" opacity="0.9"/>
+          <ellipse cx="100" cy="62" rx="3" ry="6" fill="#fff5c0"/>
+          <ellipse cx="100" cy="65" rx="12" ry="12" fill="rgba(255,180,0,0.15)"/>
+          <text x="100" y="155" text-anchor="middle" fill="rgba(100,60,20,0.5)" font-size="10" font-family="Cormorant Garamond">VANILLA DREAM</text>
+        </svg>
+      </div>
+      <div class="product-overlay"></div>
+      <span class="product-tag">Bestseller</span>
+      <div class="product-info">
+        <p class="product-name">Vanilla Dream</p>
+        <p class="product-price">Custom Order Available</p>
+      </div>
+    </div>
+    <div class="product-card p2-bg">
+      <div class="product-visual">
+        <svg class="candle-svg" viewBox="0 0 200 260" fill="none">
+          <ellipse cx="100" cy="230" rx="50" ry="10" fill="rgba(0,120,70,0.1)"/>
+          <rect x="55" y="120" width="90" height="110" rx="4" fill="url(#g2)"/>
+          <defs>
+            <linearGradient id="g2" x1="55" y1="120" x2="145" y2="230" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#2d5a3d"/>
+              <stop offset="100%" stop-color="#0a1f14"/>
+            </linearGradient>
+          </defs>
+          <line x1="100" y1="114" x2="100" y2="120" stroke="#1a3028" stroke-width="2"/>
+          <ellipse cx="100" cy="88" rx="5" ry="12" fill="#ff6600" opacity="0.95"/>
+          <ellipse cx="100" cy="80" rx="3" ry="8" fill="#ffee88"/>
+          <ellipse cx="100" cy="84" rx="18" ry="15" fill="rgba(255,120,0,0.12)"/>
+          <text x="100" y="170" text-anchor="middle" fill="rgba(100,200,120,0.3)" font-size="10" font-family="Cormorant Garamond">FOREST NOIR</text>
+        </svg>
+      </div>
+      <div class="product-overlay"></div>
+      <div class="product-info">
+        <p class="product-name">Forest Noir</p>
+        <p class="product-price">Scented Candle</p>
+      </div>
+    </div>
+    <div class="product-card p3-bg" onclick="openLink('https://www.instagram.com/ashlight.candles/')">
+      <div class="product-visual">
+        <svg class="candle-svg" viewBox="0 0 200 260" fill="none">
+          <ellipse cx="100" cy="235" rx="40" ry="7" fill="rgba(200,50,120,0.1)"/>
+          <rect x="65" y="85" width="70" height="150" rx="35" fill="url(#g3)"/>
+          <defs>
+            <linearGradient id="g3" x1="65" y1="85" x2="135" y2="235" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#d4698a"/>
+              <stop offset="100%" stop-color="#6b1a3d"/>
+            </linearGradient>
+          </defs>
+          <line x1="100" y1="79" x2="100" y2="85" stroke="#4a0a20" stroke-width="1.5"/>
+          <ellipse cx="100" cy="60" rx="4" ry="10" fill="#ff99cc" opacity="0.95"/>
+          <ellipse cx="100" cy="54" rx="2.5" ry="6" fill="#fff0f8"/>
+          <ellipse cx="100" cy="58" rx="15" ry="13" fill="rgba(255,100,180,0.15)"/>
+          <text x="100" y="165" text-anchor="middle" fill="rgba(255,150,200,0.3)" font-size="9" font-family="Cormorant Garamond">ROSE BLISS</text>
+        </svg>
+      </div>
+      <div class="product-overlay"></div>
+      <span class="product-tag">New</span>
+      <div class="product-info">
+        <p class="product-name">Rose Bliss</p>
+        <p class="product-price">Customized</p>
+      </div>
+    </div>
+    <div class="product-card p4-bg" onclick="openLink('https://www.instagram.com/ashlight.candles/')">
+      <div class="product-visual">
+        <svg class="candle-svg" viewBox="0 0 200 260" fill="none">
+          <ellipse cx="100" cy="228" rx="55" ry="10" fill="rgba(100,80,200,0.1)"/>
+          <rect x="45" y="105" width="110" height="123" rx="6" fill="url(#g4)"/>
+          <rect x="45" y="105" width="110" height="30" rx="3" fill="rgba(255,255,255,0.05)"/>
+          <defs>
+            <linearGradient id="g4" x1="45" y1="105" x2="155" y2="228" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#6b5faa"/>
+              <stop offset="100%" stop-color="#1a1540"/>
+            </linearGradient>
+          </defs>
+          <line x1="100" y1="98" x2="100" y2="105" stroke="#2a1a50" stroke-width="2"/>
+          <ellipse cx="100" cy="75" rx="4" ry="10" fill="#cc99ff" opacity="0.95"/>
+          <ellipse cx="100" cy="68" rx="2.5" ry="6" fill="#f0e8ff"/>
+          <ellipse cx="100" cy="72" rx="20" ry="16" fill="rgba(180,100,255,0.12)"/>
+        </svg>
+      </div>
+      <div class="product-overlay"></div>
+      <div class="product-info">
+        <p class="product-name">Midnight Lavender</p>
+        <p class="product-price">Gift Set Available</p>
+      </div>
+    </div>
+    <div class="product-card p5-bg" onclick="openLink('https://www.instagram.com/ashlight.candles/')">
+      <div class="product-visual">
+        <svg class="candle-svg" viewBox="0 0 200 260" fill="none">
+          <ellipse cx="100" cy="230" rx="42" ry="8" fill="rgba(200,140,0,0.1)"/>
+          <rect x="62" y="95" width="76" height="135" rx="38" fill="url(#g5)"/>
+          <defs>
+            <linearGradient id="g5" x1="62" y1="95" x2="138" y2="230" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#e8b05a"/>
+              <stop offset="100%" stop-color="#7a4500"/>
+            </linearGradient>
+          </defs>
+          <line x1="100" y1="89" x2="100" y2="95" stroke="#3d2200" stroke-width="1.5"/>
+          <ellipse cx="100" cy="68" rx="5" ry="11" fill="#ffbb33" opacity="0.95"/>
+          <ellipse cx="100" cy="61" rx="3" ry="7" fill="#fffbe0"/>
+          <ellipse cx="100" cy="65" rx="22" ry="18" fill="rgba(255,190,50,0.13)"/>
+          <text x="100" y="165" text-anchor="middle" fill="rgba(255,210,100,0.3)" font-size="9" font-family="Cormorant Garamond">AMBER GLOW</text>
+        </svg>
+      </div>
+      <div class="product-overlay"></div>
+      <span class="product-tag">Popular</span>
+      <div class="product-info">
+        <p class="product-name">Amber Glow</p>
+        <p class="product-price">Scented Candle</p>
+      </div>
+    </div>
+    <div class="product-card p2-bg" onclick="openLink('https://www.instagram.com/ashlight.candles/')">
+      <div class="product-visual">
+        <svg class="candle-svg" viewBox="0 0 200 260" fill="none">
+          <ellipse cx="100" cy="232" rx="48" ry="9" fill="rgba(50,200,100,0.1)"/>
+          <rect x="58" y="90" width="84" height="142" rx="6" fill="url(#g2fix)"/>
+          <defs>
+            <linearGradient id="g2fix" x1="58" y1="90" x2="142" y2="232" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#2d4a3e"/>
+              <stop offset="100%" stop-color="#0f2018"/>
+            </linearGradient>
+          </defs>
+          <rect x="58" y="90" width="84" height="25" rx="3" fill="rgba(255,255,255,0.04)"/>
+          <line x1="100" y1="84" x2="100" y2="90" stroke="#0a1a10" stroke-width="2"/>
+          <ellipse cx="100" cy="63" rx="5" ry="11" fill="#ff6600" opacity="0.95"/>
+          <ellipse cx="100" cy="56" rx="3" ry="7" fill="#ffee88"/>
+          <ellipse cx="100" cy="60" rx="20" ry="16" fill="rgba(255,130,0,0.12)"/>
+          <text x="100" y="168" text-anchor="middle" fill="rgba(100,200,120,0.3)" font-size="9" font-family="Cormorant Garamond">OUD &amp; CEDAR</text>
+        </svg>
+      </div>
+      <div class="product-overlay"></div>
+      <span class="product-tag">Bestseller</span>
+      <div class="product-info">
+        <p class="product-name">Oud & Cedar</p>
+        <p class="product-price">Scented Candle</p>
+      </div>
+    </div>
+    <div class="product-card p6-bg" style="background:radial-gradient(ellipse at center,#1a0800 0%,#080300 100%);" onclick="openLink('https://www.instagram.com/ashlight.candles/')">
+      <div class="product-visual" style="flex-direction:column;gap:0.5rem;">
+        <svg viewBox="0 0 200 200" width="70%" fill="none">
+          <circle cx="100" cy="100" r="70" stroke="rgba(201,168,76,0.3)" stroke-width="0.5"/>
+          <circle cx="100" cy="100" r="50" stroke="rgba(201,168,76,0.2)" stroke-width="0.5"/>
+          <text x="100" y="90" text-anchor="middle" fill="rgba(201,168,76,0.8)" font-size="13" font-family="Cormorant Garamond,serif">Custom</text>
+          <text x="100" y="112" text-anchor="middle" fill="rgba(201,168,76,0.6)" font-size="11" font-family="Cormorant Garamond,serif">Orders</text>
+          <text x="100" y="130" text-anchor="middle" fill="rgba(201,168,76,0.4)" font-size="9" font-family="Cormorant Garamond,serif">Made Just For You</text>
+        </svg>
+      </div>
+      <div class="product-overlay"></div>
+      <div class="product-info">
+        <p class="product-name">Create Your Own</p>
+        <p class="product-price">Personalized Candles</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="scents" class="scents-section">
+  <p class="section-eyebrow reveal">Signature Fragrances</p>
+  <h2 class="section-title reveal">Scents That <em style="color:var(--gold);font-family:'Playfair Display',serif;font-style:italic;">Transport</em> You</h2>
+  <div class="scents-grid">
+    <div class="scent-card reveal">
+      <span class="scent-icon">🌹</span>
+      <h3 class="scent-name">Floral Bouquet</h3>
+      <p class="scent-desc">Rose, jasmine, and lily of the valley. Fresh, romantic, unforgettable.</p>
+      <div class="scent-glow sg2"></div>
+    </div>
+    <div class="scent-card reveal">
+      <span class="scent-icon">🌿</span>
+      <h3 class="scent-name">Woodland Fresh</h3>
+      <p class="scent-desc">Pine, cedarwood, and earthy moss. Breathe in nature's calm.</p>
+      <div class="scent-glow sg3"></div>
+    </div>
+    <div class="scent-card reveal">
+      <span class="scent-icon">🍂</span>
+      <h3 class="scent-name">Warm Spice</h3>
+      <p class="scent-desc">Cinnamon, clove, and vanilla. The essence of cozy evenings.</p>
+      <div class="scent-glow sg1"></div>
+    </div>
+    <div class="scent-card reveal">
+      <span class="scent-icon">🪻</span>
+      <h3 class="scent-name">Lavender Dusk</h3>
+      <p class="scent-desc">Soothing lavender, soft musk, a touch of vanilla. Pure serenity.</p>
+      <div class="scent-glow sg4"></div>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="about-section">
+  <div class="about-visual">
+    <div class="about-circle">
+      <div class="about-inner-candle">
+        <div class="candle candle-1" style="animation-duration:3s;">
+          <div class="flame" style="transform:scale(1.3)"><div class="glow"></div><div class="flame-outer"></div><div class="flame-inner"></div></div>
+          <div class="wick"></div>
+          <div class="candle-body" style="width:70px;height:180px;background:linear-gradient(135deg,#f5e6d3,#e8c9a8,#d4a96a);"></div>
+        </div>
+        <p style="font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);opacity:0.6;margin-top:1rem;">Handcrafted</p>
+      </div>
+    </div>
+  </div>
+  <div class="about-text">
+    <p class="section-eyebrow reveal">Our Story</p>
+    <h2 class="section-title reveal">Born From <em style="color:var(--gold);font-family:'Playfair Display',serif;font-style:italic;">Passion</em>,<br>Made With Love</h2>
+    <p class="reveal">Ashlight Candles was born in the heart of Multan — where craft meets culture. Every candle is hand-poured with care, using premium fragrances that tell a story.</p>
+    <p class="reveal">From intimate gatherings to grand celebrations, our custom candles are designed to make every moment unforgettable.</p>
+    <div class="about-stats reveal">
+      <div>
+        <span class="stat-num">100+</span>
+        <p class="stat-label">Happy Customers</p>
+      </div>
+      <div>
+        <span class="stat-num">5★</span>
+        <p class="stat-label">Google Rating</p>
+      </div>
+      <div>
+        <span class="stat-num">20+</span>
+        <p class="stat-label">Scent Varieties</p>
+      </div>
+      <div>
+        <span class="stat-num">∞</span>
+        <p class="stat-label">Custom Options</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="testimonials">
+  <p class="section-eyebrow reveal">What People Say</p>
+  <h2 class="section-title reveal">Loved by Multan</h2>
+  <div class="testi-grid">
+    <div class="testi-card reveal">
+      <div class="stars">★★★★★</div>
+      <p class="testi-text">"Absolutely beautiful candles! The scent fills the whole room and the packaging is gorgeous. Ordered custom candles for my wedding — everyone loved them!"</p>
+      <p class="testi-name">— Sarah M., Multan</p>
+    </div>
+    <div class="testi-card reveal">
+      <div class="stars">★★★★★</div>
+      <p class="testi-text">"Best gift I've ever given. The rose candle smells divine and the customized label made it so personal. Will definitely order again!"</p>
+      <p class="testi-name">— Ayesha K., Lahore</p>
+    </div>
+    <div class="testi-card reveal">
+      <div class="stars">★★★★★</div>
+      <p class="testi-text">"The quality is unmatched. Burns clean, lasts long, and the fragrance is intoxicating. Ashlight Candles is my go-to for gifts now."</p>
+      <p class="testi-name">— Hamza R., Multan</p>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="cta-section">
+  <p class="section-eyebrow" style="position:relative;z-index:2;">Get In Touch</p>
+  <h2 class="section-title" style="position:relative;z-index:2;">Ready to <em style="color:var(--gold);font-style:italic;">Order?</em></h2>
+  <p style="font-size:1.1rem;opacity:0.6;max-width:400px;margin:0 auto 1rem;position:relative;z-index:2;">Visit us at Bohar Gate, Multan — or reach out on Instagram for custom orders.</p>
+  <div class="cta-buttons" style="position:relative;z-index:2;">
+    <button class="btn-primary" onclick="openLink('https://www.instagram.com/ashlight.candles/')">Shop on Instagram</button>
+    <button class="btn-secondary" onclick="openLink('https://maps.google.com/?q=Bohar+Gate+Multan')">Find Our Store</button>
+  </div>
+  <div style="margin-top:3rem;position:relative;z-index:2;">
+    <p style="font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;opacity:0.4;">981/8H, inside Bohar Gate, near Hanta Ghar, Multan</p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">
+    <span class="nav-logo">ashlight</span>
+    <p>Handcrafted scented & customized candles. Made with love in Multan.</p>
+  </div>
+  <div class="footer-col">
+    <h4>Quick Links</h4>
+    <ul>
+      <li><a href="#products">Shop</a></li>
+      <li><a href="#scents">Collections</a></li>
+      <li><a href="#about">Our Story</a></li>
+      <li><a href="https://www.instagram.com/ashlight.candles/">Instagram</a></li>
+    </ul>
+  </div>
+  <div class="footer-col">
+    <h4>Contact</h4>
+    <ul>
+      <li><a href="https://maps.google.com/?q=981/8H+Bohar+Gate+Multan" target="_blank">981/8H Bohar Gate, Multan</a></li>
+      <li><a href="https://www.instagram.com/ashlight.candles/" target="_blank">@ashlight.candles</a></li>
+      <li><a href="https://www.instagram.com/ashlight.candles/" target="_blank">Custom Orders Welcome</a></li>
+    </ul>
+  </div>
+  <div class="footer-bottom">© 2025 Ashlight Candles — Multan's Finest Candle Studio</div>
+</footer>
+
+<script>
+// ── Cursor ──────────────────────────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+const dot = document.getElementById('cursor-dot');
+let mx=0,my=0,cx=0,cy=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx-2+'px';dot.style.top=my-2+'px';});
+function animCursor(){cx+=(mx-cx)*0.12;cy+=(my-cy)*0.12;cursor.style.left=cx-10+'px';cursor.style.top=cy-10+'px';requestAnimationFrame(animCursor);}
+animCursor();
+
+// Scale cursor on hover over clickable elements
+document.querySelectorAll('a,button,.product-card,.scent-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cursor.style.transform='scale(2)');
+  el.addEventListener('mouseleave',()=>cursor.style.transform='scale(1)');
+});
+
+// ── Scroll Reveal ────────────────────────────────────────────────────────────
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// ── Smooth Scroll for Nav Links ──────────────────────────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(link=>{
+  link.addEventListener('click',e=>{
+    const id=link.getAttribute('href');
+    if(id==='#')return;
+    const target=document.querySelector(id);
+    if(target){e.preventDefault();target.scrollIntoView({behavior:'smooth',block:'start'});}
+  });
+});
+
+// ── openLink: used by CTA buttons ───────────────────────────────────────────
+function openLink(url){
+  window.open(url,'_blank','noopener,noreferrer');
+}
+</script>
+</body>
+</html>
